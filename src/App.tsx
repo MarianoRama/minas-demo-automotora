@@ -1,24 +1,16 @@
-import Header from './components/Header'
-import Hero from './components/Hero'
-import Catalogo from './components/Catalogo'
-import VenderAuto from './components/VenderAuto'
-import Ubicacion from './components/Ubicacion'
-import Footer from './components/Footer'
-import WhatsAppButton from './components/WhatsAppButton'
+import { DatosProvider } from './data/store'
+import { useHashRoute } from './hooks/useHashRoute'
+import SitioPublico from './SitioPublico'
+import AdminApp from './admin/AdminApp'
 
 function App() {
+  const hash = useHashRoute()
+  const esAdmin = hash.startsWith('#/admin')
+
   return (
-    <div className="min-h-screen bg-white">
-      <Header />
-      <main>
-        <Hero />
-        <Catalogo />
-        <VenderAuto />
-        <Ubicacion />
-      </main>
-      <Footer />
-      <WhatsAppButton />
-    </div>
+    <DatosProvider>
+      {esAdmin ? <AdminApp /> : <SitioPublico />}
+    </DatosProvider>
   )
 }
 

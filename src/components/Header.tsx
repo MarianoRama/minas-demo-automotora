@@ -1,61 +1,87 @@
 import { useState } from 'react'
+import { Menu, Phone, X } from 'lucide-react'
+import { useDatos } from '../data/store'
 
 const links = [
-  { href: '#inicio', label: 'Inicio' },
-  { href: '#catalogo', label: 'Catálogo' },
+  { href: '#catalogo', label: 'Vehículos' },
+  { href: '#financiacion', label: 'Financiación' },
   { href: '#vender', label: 'Vendé tu auto' },
-  { href: '#contacto', label: 'Contacto' },
+  { href: '#confianza', label: 'Nosotros' },
+  { href: '#contacto', label: 'Ubicación' },
 ]
 
 export default function Header() {
+  const { negocio } = useDatos()
   const [open, setOpen] = useState(false)
+  const linkContacto = `https://wa.me/${negocio.whatsapp}?text=${encodeURIComponent('Hola, quiero hacer una consulta.')}`
 
   return (
-    <header className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur border-b border-slate-800 text-slate-100">
+    <header className="sticky top-0 z-40 border-b border-tinta-3/40 bg-tinta text-hueso">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-        <a href="#inicio" className="flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-md bg-blue-600 font-bold text-white">
-            R8
+        <a href="#inicio" className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-sm bg-senal font-display text-lg font-bold text-tinta">
+            {negocio.inicial}
           </span>
-          <span className="text-lg font-semibold tracking-tight">
-            Automotora <span className="text-blue-400">Ruta 8</span>
+          <span className="font-display text-base font-bold uppercase tracking-tight sm:text-lg">
+            {negocio.nombre}
           </span>
         </a>
 
-        <nav className="hidden gap-8 md:flex">
+        <nav className="hidden gap-7 md:flex">
           {links.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-slate-300 transition hover:text-white"
+              className="text-xs font-bold uppercase tracking-[0.12em] text-hueso/80 transition hover:text-senal"
             >
               {link.label}
             </a>
           ))}
         </nav>
 
+        <a
+          href={linkContacto}
+          target="_blank"
+          rel="noreferrer"
+          className="hidden items-center gap-2 rounded-sm bg-senal px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-tinta transition hover:bg-hueso md:flex"
+        >
+          <Phone size={15} aria-hidden="true" />
+          Contactar
+        </a>
+
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="flex h-9 w-9 items-center justify-center rounded-md border border-slate-700 text-slate-200 md:hidden"
-          aria-label="Abrir menú"
+          className="flex h-11 w-11 items-center justify-center rounded-sm border border-hueso/25 text-hueso md:hidden"
+          aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
+          aria-expanded={open}
         >
-          <span className="text-xl leading-none">{open ? '✕' : '☰'}</span>
+          {open ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
       {open && (
-        <nav className="flex flex-col gap-1 border-t border-slate-800 bg-slate-900 px-4 py-3 md:hidden">
+        <nav className="flex flex-col gap-1 border-t border-tinta-3/40 bg-tinta px-4 py-3 md:hidden">
           {links.map((link) => (
             <a
               key={link.href}
               href={link.href}
               onClick={() => setOpen(false)}
-              className="rounded-md px-2 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white"
+              className="rounded-sm px-2 py-3 text-sm font-semibold uppercase tracking-wide text-hueso/85 hover:bg-tinta-3/60 hover:text-senal"
             >
               {link.label}
             </a>
           ))}
+          <a
+            href={linkContacto}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => setOpen(false)}
+            className="mt-2 flex items-center justify-center gap-2 rounded-sm bg-senal px-4 py-3 text-sm font-bold uppercase tracking-wide text-tinta"
+          >
+            <Phone size={16} aria-hidden="true" />
+            Contactar
+          </a>
         </nav>
       )}
     </header>
