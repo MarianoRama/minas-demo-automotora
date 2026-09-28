@@ -4,27 +4,45 @@ import { formatoKm, formatoPrecio } from '../lib/formato'
 import { useReveal, revealClases } from '../hooks/useReveal'
 import CarIllustration from './CarIllustration'
 
+type Badge = { texto: string; clase: string }
+
 interface Props {
   auto: Auto
   delay: number
   onVerFicha: (auto: Auto) => void
+  /**
+   * Insignia a mostrar. Si se omite, se calcula con la prioridad por
+   * defecto (destacado > eléctrico > recién ingresado). Se usa para que
+   * las filas curadas (Destacados, Recién ingresados, etc.) muestren
+   * siempre la insignia que corresponde a esa categoría, en vez de la
+   * que le tocaría al auto por prioridad general.
+   */
+  badge?: Badge | null
 }
 
 const anioMasNuevo = Math.max(...autos.map((a) => a.anio))
 
-export default function AutoCard({ auto, delay, onVerFicha }: Props) {
+export const BADGES = {
+  destacado: { texto: 'Destacado', clase: 'bg-senal text-tinta' } satisfies Badge,
+  electrico: { texto: 'Eléctrico', clase: 'bg-tinta-3 text-hueso' } satisfies Badge,
+  automatica: { texto: 'Automática', clase: 'bg-sky-800 text-hueso' } satisfies Badge,
+  recienIngresado: { texto: 'Recién ingresado', clase: 'bg-emerald-700 text-hueso' } satisfies Badge,
+}
+
+function badgePorDefecto(auto: Auto): Badge | null {
+  if (auto.destacado) return BADGES.destacado
+  if (auto.combustible === 'Eléctrico') return BADGES.electrico
+  if (anioMasNuevo - auto.anio <= 1) return BADGES.recienIngresado
+  return null
+}
+
+export default function AutoCard({ auto, delay, onVerFicha, badge }: Props) {
   const { ref, visible } = useReveal<HTMLElement>(delay)
 
   const mensaje = `Hola, te escribo por el ${auto.marca} ${auto.modelo} ${auto.version} ${auto.anio} (U$S ${auto.precio.toLocaleString('es-UY')}). ¿Sigue disponible?`
   const linkWhatsapp = `https://wa.me/${NEGOCIO.whatsapp}?text=${encodeURIComponent(mensaje)}`
 
-  const badge = auto.destacado
-    ? { texto: 'Destacado', clase: 'bg-senal text-tinta' }
-    : auto.combustible === 'Eléctrico'
-      ? { texto: 'Eléctrico', clase: 'bg-tinta-3 text-hueso' }
-      : anioMasNuevo - auto.anio <= 1
-        ? { texto: 'Recién ingresado', clase: 'bg-emerald-700 text-hueso' }
-        : null
+  const badgeFinal = badge !== undefined ? badge : badgePorDefecto(auto)
 
   return (
     <article
@@ -38,9 +56,9 @@ export default function AutoCard({ auto, delay, onVerFicha }: Props) {
         aria-label={`Ver ficha de ${auto.marca} ${auto.modelo}`}
       >
         <div className="relative overflow-hidden bg-hueso-2 px-4 pt-4">
-          {badge && (
-            <span className={`absolute left-3 top-3 z-10 rounded-sm px-2 py-1 text-[11px] font-bold uppercase tracking-wide ${badge.clase}`}>
-              {badge.texto}
+          {badgeFinal && (
+            <span className={`absolute left-3 top-3 z-10 rounded-sm px-2 py-1 text-[11px] font-bold uppercase tracking-wide ${badgeFinal.clase}`}>
+              {badgeFinal.texto}
             </span>
           )}
           {auto.foto ? (

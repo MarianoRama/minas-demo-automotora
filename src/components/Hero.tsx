@@ -18,7 +18,7 @@ const stats = [
 const marcas = Array.from(new Set(autos.map((a) => a.marca))).sort()
 
 const rangosPrecio = [
-  { valor: 'todos', label: 'Cualquier precio' },
+  { valor: 'todos', label: 'Precio' },
   { valor: '15000', label: 'Hasta U$S 15.000' },
   { valor: '22000', label: 'Hasta U$S 22.000' },
   { valor: '30000', label: 'Hasta U$S 30.000' },
@@ -44,7 +44,7 @@ export default function Hero() {
 
   return (
     <section id="inicio" className="rayas-diagonal relative overflow-hidden bg-hueso">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.1fr_1fr] md:py-16">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1fr_1.15fr] md:py-16">
         <div className="flex flex-col justify-center">
           <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-senal-2">
             <span aria-hidden="true" className="h-px w-7 bg-senal-2" />
@@ -94,14 +94,14 @@ export default function Hero() {
             onSubmit={buscar}
             className="mt-6 grid gap-2 rounded-sm bg-white p-3 shadow-sm ring-1 ring-linea sm:grid-cols-[1fr_1fr_1fr_auto]"
           >
-            <label className="text-left">
+            <label className="min-w-0 text-left">
               <span className="sr-only">Marca</span>
               <select
                 value={marca}
                 onChange={(e) => setMarca(e.target.value)}
                 className="min-h-11 w-full rounded-sm border border-linea px-2 text-sm focus:border-tinta focus:outline-none"
               >
-                <option value="Todas">Cualquier marca</option>
+                <option value="Todas">Marca</option>
                 {marcas.map((m) => (
                   <option key={m} value={m}>
                     {m}
@@ -109,14 +109,14 @@ export default function Hero() {
                 ))}
               </select>
             </label>
-            <label className="text-left">
+            <label className="min-w-0 text-left">
               <span className="sr-only">Tipo de vehículo</span>
               <select
                 value={tipo}
                 onChange={(e) => setTipo(e.target.value as TipoCarroceria | 'Todos')}
                 className="min-h-11 w-full rounded-sm border border-linea px-2 text-sm focus:border-tinta focus:outline-none"
               >
-                <option value="Todos">Cualquier tipo</option>
+                <option value="Todos">Carrocería</option>
                 {tiposCarroceria.map((t) => (
                   <option key={t} value={t}>
                     {t}
@@ -124,7 +124,7 @@ export default function Hero() {
                 ))}
               </select>
             </label>
-            <label className="text-left">
+            <label className="min-w-0 text-left">
               <span className="sr-only">Precio</span>
               <select
                 value={precio}
@@ -160,19 +160,19 @@ export default function Hero() {
           </div>
         </div>
 
-        <div className="relative flex flex-col justify-center">
+        <div className="relative flex flex-col justify-center md:-mr-10 lg:-mr-16">
           <div className="relative">
             <CarIllustration
               tipo={destacado.tipo}
               color={destacado.color}
               titulo={`${destacado.marca} ${destacado.modelo}, vehículo destacado`}
-              className="w-full drop-shadow-[0_22px_30px_rgba(18,35,63,0.28)]"
+              className="w-full drop-shadow-[0_22px_30px_rgba(18,35,63,0.28)] md:w-[115%]"
             />
           </div>
 
           <a
             href="#catalogo"
-            className="group relative z-10 -mt-6 flex w-fit items-center gap-4 self-center rounded-sm bg-white px-4 py-3 shadow-lg ring-1 ring-linea sm:self-end"
+            className="group relative z-10 -mt-6 flex w-fit items-center gap-4 self-center rounded-sm bg-white px-4 py-3 shadow-lg ring-1 ring-linea sm:self-end md:mr-10 lg:mr-16"
           >
             <div>
               <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-senal-2">

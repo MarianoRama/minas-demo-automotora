@@ -4,7 +4,7 @@ import { autos, tiposCarroceria, type Auto } from '../data/cars'
 import { formatoPrecio } from '../lib/formato'
 import { useFiltrosCatalogo, type FiltroTipo } from '../context/FiltrosCatalogo'
 import AutoDetalle from './AutoDetalle'
-import AutoCard from './AutoCard'
+import AutoCard, { BADGES } from './AutoCard'
 import Reveal from './Reveal'
 import CarruselCategoria from './CarruselCategoria'
 
@@ -78,19 +78,37 @@ export default function Catalogo() {
 
         <CarruselCategoria titulo="Destacados" total={destacados.length}>
           {destacados.map((auto, i) => (
-            <AutoCard key={auto.id} auto={auto} delay={i * 60} onVerFicha={setSeleccionado} />
+            <AutoCard
+              key={auto.id}
+              auto={auto}
+              delay={i * 60}
+              onVerFicha={setSeleccionado}
+              badge={BADGES.destacado}
+            />
           ))}
         </CarruselCategoria>
 
         <CarruselCategoria titulo="Recién ingresados" total={recienIngresados.length}>
           {recienIngresados.map((auto, i) => (
-            <AutoCard key={auto.id} auto={auto} delay={i * 60} onVerFicha={setSeleccionado} />
+            <AutoCard
+              key={auto.id}
+              auto={auto}
+              delay={i * 60}
+              onVerFicha={setSeleccionado}
+              badge={BADGES.recienIngresado}
+            />
           ))}
         </CarruselCategoria>
 
         <CarruselCategoria titulo="Automáticos y eléctricos" total={electrificados.length}>
           {electrificados.map((auto, i) => (
-            <AutoCard key={auto.id} auto={auto} delay={i * 60} onVerFicha={setSeleccionado} />
+            <AutoCard
+              key={auto.id}
+              auto={auto}
+              delay={i * 60}
+              onVerFicha={setSeleccionado}
+              badge={auto.combustible === 'Eléctrico' ? BADGES.electrico : BADGES.automatica}
+            />
           ))}
         </CarruselCategoria>
 
