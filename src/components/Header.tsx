@@ -11,14 +11,14 @@ export default function Header() {
   const [open, setOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur border-b border-slate-800 text-slate-100">
+    <header className="sticky top-0 z-50 bg-[#202825]/95 backdrop-blur border-b border-[#3b453c] text-slate-100">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
         <a href="#inicio" className="flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-md bg-blue-600 font-bold text-white">
+          <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[#c4422e] font-bold text-white">
             PA
           </span>
           <span className="text-lg font-semibold tracking-tight">
-            Pereyra <span className="text-blue-400">Automotores</span>
+            Pereyra <span className="text-[#e4d8bd]">Automotores</span>
           </span>
         </a>
 
@@ -47,7 +47,7 @@ export default function Header() {
       </div>
 
       {open && (
-        <nav id="menu-movil" className="flex flex-col gap-1 border-t border-slate-800 bg-slate-900 px-4 py-3 md:hidden">
+        <nav id="menu-movil" className="flex flex-col gap-1 border-t border-[#3b453c] bg-[#202825] px-4 py-3 md:hidden">
           {links.map((link) => (
             <a
               key={link.href}

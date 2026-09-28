@@ -123,7 +123,7 @@ export default function VenderAuto() {
 
           <button
             type="submit"
-            className="mt-6 w-full rounded-md bg-blue-600 py-3 text-sm font-semibold text-white transition hover:bg-blue-500"
+            className="mt-6 w-full rounded-md bg-[#c4422e] py-3 text-sm font-semibold text-white transition hover:bg-[#a73323]"
           >
             Solicitar tasación
           </button>

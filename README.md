@@ -28,12 +28,12 @@ es ilustrativa y no corresponde a los anuncios de la demo; las demás fichas mue
 ## Secciones incluidas
 
 - Header con logo y navegación
-- Ficha de auto ilustrativa en portada, búsqueda por marca/modelo y filtro por tipo
-- Catálogo con estado disponible/vendido y fichas borrador ocultas
+- Portada fotográfica, buscador y filtros combinables: marca, carrocería, precio mínimo/máximo, año mínimo/máximo y kilometraje máximo
+- Catálogo con estados, orden por precio/año/kilómetros, favoritos de sesión, comparación de hasta tres unidades y ficha modal con galería. Borradores ocultos.
 - Formulario "Vendé tu auto" sin backend ni registro de datos
 - Botón flotante de WhatsApp
 - Sección de ubicación (mapa embebido de Minas, Uruguay) y horarios
-- Footer con contacto ficticio
+- Footer de demostración; ningún contacto ficticio recibe consultas. Fotos y créditos en FOTOGRAFIAS.md.
 
 ## Cómo correrlo
 
