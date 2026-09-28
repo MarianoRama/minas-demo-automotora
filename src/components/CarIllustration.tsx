@@ -8,7 +8,7 @@ interface Props {
   titulo?: string
 }
 
-const GROUND = 182
+const GROUND = 172
 
 function shade(hex: string, amount: number) {
   const c = hex.replace('#', '')
@@ -24,325 +24,297 @@ function shade(hex: string, amount: number) {
   return `rgb(${r}, ${g}, ${b})`
 }
 
-/** Travels right-to-left over each wheel arch (front wheel first), ending at xRear. */
-function bottomEdgeRTL(xRear: number, rockerY: number, wheelsDesc: number[], archR: number) {
-  let d = ''
-  for (const cx of wheelsDesc) {
-    d += `L${cx + archR},${rockerY} A${archR},${archR} 0 0 0 ${cx - archR},${rockerY} `
-  }
-  d += `L${xRear},${rockerY} `
-  return d
+/** Hueco de rueda: semicírculo que se recorre de adelante hacia atrás (derecha → izquierda). */
+function arch(cx: number, y: number, r: number) {
+  return `L${cx + r},${y} A${r},${r} 0 0 0 ${cx - r},${y}`
 }
 
-interface TipoConfig {
-  wheels: [number, number][] // [cx, r]
+interface Silueta {
+  /** Contorno de la carrocería (auto mirando a la derecha). */
   body: string
+  /** Superficie vidriada lateral. */
   glass: string
-  pillar: { x1: number; y1: number; x2: number; y2: number }
-  belt: string
-  cladding?: string
-  mirrorPath: string
-  headlight: { x: number; y: number; w: number; h: number; rotate: number }
-  taillight: { x: number; y: number; w: number; h: number }
-  handle: { x: number; y: number; w: number; h: number }
+  /** Parantes que dividen el vidrio (se pintan del color de la carrocería). */
+  pillars: string[]
+  /** Líneas de puertas. */
+  doors: string[]
+  /** Línea de cintura / pliegue lateral. */
+  crease: string
+  wheels: { cx: number; r: number }[]
+  rockerY: number
+  archR: number
+  headlight: string
+  taillight: string
+  mirror: string
+  handles: { x: number; y: number }[]
+  /** Parte baja en plástico negro (SUV / pickup). */
+  cladding?: boolean
+  extra?: 'rack' | 'bed'
 }
 
-function buildConfig(tipo: TipoCarroceria): TipoConfig {
+function silueta(tipo: TipoCarroceria): Silueta {
   switch (tipo) {
     case 'Hatchback': {
-      const wheels: [number, number][] = [[104, 32], [300, 32]]
-      const archR = 36
-      const rockerY = 150
-      const xRear = 40
-      const xFront = 344
+      const w = [{ cx: 112, r: 27 }, { cx: 292, r: 27 }]
+      const y = 150
+      const R = 35
       return {
-        wheels,
-        body: `M${xRear},${rockerY} L40,136
-          Q40,128 48,125
-          L62,120
-          Q68,100 84,88
-          L94,81
-          Q110,70 130,64
-          Q150,58 172,57
-          L206,57
-          Q220,57 227,68
-          L240,96
-          L266,100
-          Q292,104 308,116
-          L332,127
-          Q344,132 344,140
-          L${xFront},${rockerY}
-          ${bottomEdgeRTL(xRear, rockerY, [300, 104], archR)}
-          Z`,
-        glass: `M96,102 L102,86
-          Q112,74 128,69
-          Q146,64 168,63
-          L204,63
-          Q212,63 216,71
-          L226,96
-          Z`,
-        pillar: { x1: 168, y1: 63, x2: 168, y2: 99 },
-        belt: `M40,120 L344,140`,
-        mirrorPath: `M92,83 C97,79 104,77 109,78 L107,85 Z`,
-        headlight: { x: 312, y: 115, w: 21, h: 12, rotate: 18 },
-        taillight: { x: 42, y: 130, w: 14, h: 10 },
-        handle: { x: 178, y: 88, w: 20, h: 5 },
+        wheels: w,
+        rockerY: y,
+        archR: R,
+        body: `M54,${y} C48,${y} 44,146 44,138 L44,112
+          C44,105 46,99 50,94 L60,80 C64,74 70,70 80,68
+          C110,62 150,59 192,59 L216,59
+          C238,61 252,70 276,96 C304,99 328,104 344,111
+          C354,116 359,123 359,131 L358,142 C357,147 353,${y} 347,${y}
+          ${arch(w[1].cx, y, R)} ${arch(w[0].cx, y, R)} Z`,
+        glass: `M60,95 L67,84 C71,77 78,73 88,71 C116,66 152,64 192,64 L214,64
+          C230,65 242,74 262,97 Z`,
+        pillars: ['M86,95 L98,70 L120,66 L112,96 Z', 'M184,99 L186,65 L194,65 L193,99 Z'],
+        doors: ['M189,100 L188,146', 'M272,100 C270,118 268,132 262,146', 'M114,100 C114,116 116,124 120,132'],
+        crease: 'M46,116 C140,110 250,110 352,118',
+        headlight: 'M340,110 C350,113 357,118 359,124 L346,124 C341,121 338,116 340,110 Z',
+        taillight: 'M44,100 L55,99 L55,114 L44,115 Z',
+        mirror: 'M264,95 C266,89 272,86 280,87 L281,95 Z',
+        handles: [{ x: 156, y: 108 }, { x: 236, y: 108 }],
       }
     }
     case 'Sedán': {
-      const wheels: [number, number][] = [[100, 32], [312, 32]]
-      const archR = 36
-      const rockerY = 150
-      const xRear = 38
-      const xFront = 356
+      const w = [{ cx: 98, r: 27 }, { cx: 302, r: 27 }]
+      const y = 150
+      const R = 35
       return {
-        wheels,
-        body: `M${xRear},${rockerY} L38,138
-          Q38,130 46,127
-          L58,123
-          Q64,102 80,90
-          L90,83
-          Q106,71 126,65
-          Q144,59 164,58
-          L196,58
-          Q208,58 213,68
-          L220,84
-          L246,88
-          Q262,90 276,95
-          L296,102
-          Q336,108 348,124
-          L354,134
-          Q356,138 356,144
-          L${xFront},${rockerY}
-          ${bottomEdgeRTL(xRear, rockerY, [312, 100], archR)}
-          Z`,
-        glass: `M92,104 L98,88
-          Q108,75 124,70
-          Q142,65 162,64
-          L194,64
-          Q202,64 206,72
-          L212,86
-          Z`,
-        pillar: { x1: 158, y1: 64, x2: 158, y2: 103 },
-        belt: `M38,122 L356,144`,
-        mirrorPath: `M88,85 C93,81 100,79 105,80 L103,87 Z`,
-        headlight: { x: 324, y: 117, w: 21, h: 12, rotate: 16 },
-        taillight: { x: 40, y: 132, w: 14, h: 10 },
-        handle: { x: 172, y: 92, w: 20, h: 5 },
+        wheels: w,
+        rockerY: y,
+        archR: R,
+        body: `M34,${y} C28,${y} 24,146 24,138 L24,121
+          C24,111 29,105 40,103 L114,98
+          C136,82 158,68 188,64 L236,63
+          C256,64 270,73 292,97 C322,100 346,104 363,111
+          C372,115 377,122 377,130 L376,142 C375,147 371,${y} 365,${y}
+          ${arch(w[1].cx, y, R)} ${arch(w[0].cx, y, R)} Z`,
+        glass: `M126,98 C146,84 164,72 190,69 L234,68
+          C250,69 262,77 280,96 Z`,
+        pillars: ['M126,98 L150,82 L160,82 L146,98 Z', 'M204,98 L205,68 L213,68 L212,98 Z'],
+        doors: ['M208,99 L207,147', 'M286,99 C284,118 280,134 272,146', 'M136,99 C134,116 132,128 132,140'],
+        crease: 'M26,114 C140,108 260,108 370,117',
+        headlight: 'M356,110 C366,113 373,118 376,124 L362,124 C357,121 354,116 356,110 Z',
+        taillight: 'M24,106 L40,104 L40,115 L24,117 Z',
+        mirror: 'M280,95 C282,89 288,86 296,87 L297,95 Z',
+        handles: [{ x: 176, y: 107 }, { x: 250, y: 107 }],
       }
     }
     case 'SUV': {
-      const wheels: [number, number][] = [[98, 35], [306, 35]]
-      const archR = 40
-      const rockerY = 148
-      const xRear = 36
-      const xFront = 356
+      const w = [{ cx: 108, r: 29 }, { cx: 302, r: 29 }]
+      const y = 146
+      const R = 37
       return {
-        wheels,
-        body: `M${xRear},${rockerY} L36,124
-          Q36,113 46,109
-          L60,104
-          Q66,84 84,72
-          L96,65
-          Q114,54 136,49
-          Q152,45 170,45
-          L224,45
-          Q238,45 245,57
-          L256,102
-          L282,105
-          Q326,108 342,122
-          L352,134
-          Q356,139 356,146
-          L${xFront},${rockerY}
-          ${bottomEdgeRTL(xRear, rockerY, [306, 98], archR)}
-          Z`,
-        cladding: `M${xRear},${rockerY} L${xFront},${rockerY} L356,164 Q356,172 348,172 L44,172 Q36,172 36,164 Z`,
-        glass: `M92,98 L100,78
-          Q112,63 130,57
-          Q150,50 172,50
-          L220,50
-          Q230,50 234,60
-          L244,98
-          Z`,
-        pillar: { x1: 176, y1: 50, x2: 176, y2: 98 },
-        belt: `M36,113 L356,134`,
-        mirrorPath: `M108,80 C113,76 120,74 125,75 L123,82 Z`,
-        headlight: { x: 340, y: 126, w: 21, h: 12, rotate: 20 },
-        taillight: { x: 38, y: 126, w: 15, h: 11 },
-        handle: { x: 186, y: 82, w: 20, h: 5 },
+        wheels: w,
+        rockerY: y,
+        archR: R,
+        cladding: true,
+        extra: 'rack',
+        body: `M44,${y} C38,${y} 34,142 34,134 L34,96
+          C34,78 39,65 52,58 C72,52 110,50 160,50 L234,50
+          C254,51 268,60 290,88 C318,92 342,97 358,104
+          C367,109 371,117 371,127 L370,138 C369,143 365,${y} 359,${y}
+          ${arch(w[1].cx, y, R)} ${arch(w[0].cx, y, R)} Z`,
+        glass: `M48,91 C48,78 54,67 66,62 C92,57 128,56 162,56 L232,56
+          C248,57 260,65 278,88 Z`,
+        pillars: ['M100,90 L112,57 L132,57 L124,90 Z', 'M196,89 L198,56 L207,56 L206,89 Z'],
+        doors: ['M201,90 L200,132', 'M282,90 C280,106 276,120 270,132', 'M128,90 C128,106 130,118 134,128'],
+        crease: 'M36,106 C140,100 260,100 364,110',
+        headlight: 'M350,102 C360,105 368,110 371,117 L356,117 C351,114 348,109 350,102 Z',
+        taillight: 'M34,92 L46,91 L46,106 L34,107 Z',
+        mirror: 'M280,87 C282,81 288,78 296,79 L297,87 Z',
+        handles: [{ x: 168, y: 100 }, { x: 246, y: 100 }],
       }
     }
     case 'Pickup': {
-      const wheels: [number, number][] = [[130, 32], [298, 32]]
-      const archR = 36
-      const rockerY = 150
-      const xRear = 36
-      const xFront = 358
+      const w = [{ cx: 96, r: 29 }, { cx: 306, r: 29 }]
+      const y = 146
+      const R = 37
       return {
-        wheels,
-        body: `M${xRear},${rockerY} L36,112
-          Q36,104 46,104
-          L228,104
-          Q222,88 228,64
-          Q230,56 240,52
-          L258,50
-          Q270,50 278,58
-          L286,90
-          L338,97
-          Q352,100 356,112
-          L358,130
-          L${xFront},${rockerY}
-          ${bottomEdgeRTL(xRear, rockerY, [298, 130], archR)}
-          Z`,
-        glass: `M234,98
-          L242,64
-          Q248,56 258,54
-          L266,54
-          Q272,54 274,60
-          L280,88
-          Z`,
-        pillar: { x1: 256, y1: 54, x2: 256, y2: 92 },
-        belt: `M36,110 L356,112`,
-        mirrorPath: `M264,72 C269,68 275,66 280,67 L278,74 Z`,
-        headlight: { x: 342, y: 100, w: 19, h: 12, rotate: 10 },
-        taillight: { x: 38, y: 108, w: 15, h: 11 },
-        handle: { x: 246, y: 78, w: 18, h: 5 },
+        wheels: w,
+        rockerY: y,
+        archR: R,
+        cladding: true,
+        extra: 'bed',
+        body: `M28,${y} C22,${y} 20,142 20,136 L20,94 C20,90 22,88 26,88
+          L186,88 L187,68 C188,58 196,52 208,52 L258,52
+          C274,53 286,62 306,88 C332,91 354,95 367,101
+          C375,106 378,114 378,124 L377,138 C376,143 372,${y} 366,${y}
+          ${arch(w[1].cx, y, R)} ${arch(w[0].cx, y, R)} Z`,
+        glass: `M194,87 L194,68 C195,61 200,58 210,58 L256,58
+          C270,59 280,67 296,87 Z`,
+        pillars: ['M238,87 L239,58 L247,58 L246,87 Z'],
+        doors: ['M191,90 L191,134', 'M242,90 L241,134', 'M300,90 C298,106 292,122 284,134'],
+        crease: 'M22,104 C140,99 260,99 372,108',
+        headlight: 'M354,99 C364,102 372,107 377,114 L360,114 C355,111 352,105 354,99 Z',
+        taillight: 'M20,94 L30,94 L30,110 L20,110 Z',
+        mirror: 'M296,86 C298,80 304,77 312,78 L313,86 Z',
+        handles: [{ x: 214, y: 98 }, { x: 266, y: 98 }],
       }
     }
   }
 }
 
-function Wheel({ cx, r, dark }: { cx: number; r: number; dark: string }) {
-  const cy = GROUND - r * 0.98
+function Wheel({ cx, r, uid }: { cx: number; r: number; uid: string }) {
+  const cy = GROUND - r
   const spokes = [0, 1, 2, 3, 4].map((i) => {
     const a = (i / 5) * Math.PI * 2 - Math.PI / 2
-    const x1 = cx + Math.cos(a) * r * 0.14
-    const y1 = cy + Math.sin(a) * r * 0.14
-    const x2 = cx + Math.cos(a) * r * 0.54
-    const y2 = cy + Math.sin(a) * r * 0.54
-    return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#9aa0a8" strokeWidth={r * 0.13} strokeLinecap="round" />
+    return (
+      <line
+        key={i}
+        x1={cx + Math.cos(a) * r * 0.16}
+        y1={cy + Math.sin(a) * r * 0.16}
+        x2={cx + Math.cos(a) * r * 0.6}
+        y2={cy + Math.sin(a) * r * 0.6}
+        stroke={`url(#rim-${uid})`}
+        strokeWidth={r * 0.2}
+        strokeLinecap="round"
+      />
+    )
   })
   return (
     <g>
-      <ellipse cx={cx} cy={GROUND + 2} rx={r * 1.3} ry={r * 0.3} fill="#000" opacity={0.2} />
-      <circle cx={cx} cy={cy} r={r} fill="#15181d" />
-      <circle cx={cx} cy={cy} r={r * 0.97} fill="none" stroke="#31353c" strokeWidth={r * 0.06} />
-      <circle cx={cx} cy={cy} r={r * 0.6} fill="#d7dadf" />
-      <circle cx={cx} cy={cy} r={r * 0.6} fill="none" stroke="#9aa0a8" strokeWidth={r * 0.04} />
+      <circle cx={cx} cy={cy} r={r} fill="#161a20" />
+      <circle cx={cx} cy={cy} r={r * 0.86} fill="none" stroke="#262b33" strokeWidth={r * 0.05} />
+      <circle cx={cx} cy={cy} r={r * 0.66} fill="#2b313a" />
+      <circle cx={cx} cy={cy} r={r * 0.36} fill="#565e69" />
       {spokes}
-      <circle cx={cx} cy={cy} r={r * 0.15} fill={dark} />
+      <circle cx={cx} cy={cy} r={r * 0.66} fill="none" stroke="#c4cad2" strokeWidth={r * 0.07} />
+      <circle cx={cx} cy={cy} r={r * 0.14} fill="#8d96a1" stroke="#3a414b" strokeWidth="1" />
     </g>
   )
 }
 
 /**
- * Ilustración de perfil lateral, plana y duotono, parametrizada por
- * carrocería y color. No usa fotos: es un ícono de marca propio del sitio,
- * con proporciones de auto moderno (capó, parabrisas inclinado, techo
- * continuo, ruedas grandes con llanta de aleación y reflejo en el vidrio).
+ * Ilustración vectorial de perfil lateral, parametrizada por carrocería y color.
+ * No usa fotos: cada auto tiene un campo `foto` opcional que la reemplaza.
  */
 export default function CarIllustration({ tipo, color, className, titulo }: Props) {
   const uid = useId().replace(/:/g, '')
-  const cfg = buildConfig(tipo)
-  const light = shade(color, 0.34)
-  const dark = shade(color, -0.24)
+  const s = silueta(tipo)
+  const light = shade(color, 0.3)
+  const dark = shade(color, -0.35)
+  const outline = shade(color, -0.55)
 
   return (
     <svg
-      viewBox="0 0 400 210"
+      viewBox="0 0 400 190"
       className={className}
       role="img"
       aria-label={titulo ?? `Ilustración de ${tipo.toLowerCase()}`}
     >
       <defs>
-        <linearGradient id={`grad-${uid}`} x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={`paint-${uid}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={light} />
-          <stop offset="52%" stopColor={color} />
+          <stop offset="45%" stopColor={color} />
           <stop offset="100%" stopColor={dark} />
         </linearGradient>
-        <linearGradient id={`glass-${uid}`} x1="0" y1="0" x2="1" y2="0.6">
-          <stop offset="0%" stopColor="rgba(255,255,255,0.4)" />
-          <stop offset="30%" stopColor="rgba(13,22,40,0.94)" />
-          <stop offset="100%" stopColor="rgba(13,22,40,0.94)" />
+        <linearGradient id={`glass-${uid}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#3b4d63" />
+          <stop offset="100%" stopColor="#141c27" />
         </linearGradient>
+        <linearGradient id={`rim-${uid}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#eef1f4" />
+          <stop offset="100%" stopColor="#a9b1bb" />
+        </linearGradient>
+        <radialGradient id={`shadow-${uid}`} cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0%" stopColor="#000" stopOpacity="0.32" />
+          <stop offset="70%" stopColor="#000" stopOpacity="0.12" />
+          <stop offset="100%" stopColor="#000" stopOpacity="0" />
+        </radialGradient>
+        <clipPath id={`bodyclip-${uid}`}>
+          <path d={s.body} />
+        </clipPath>
         <clipPath id={`glassclip-${uid}`}>
-          <path d={cfg.glass} />
+          <path d={s.glass} />
         </clipPath>
       </defs>
 
-      <ellipse cx="200" cy={GROUND + 4} rx="172" ry="9" fill="#000" opacity="0.16" />
+      {/* sombra en el piso */}
+      <ellipse cx="200" cy={GROUND + 1} rx="190" ry="11" fill={`url(#shadow-${uid})`} />
 
-      {cfg.wheels.map(([cx, r], i) => (
-        <Wheel key={i} cx={cx} r={r} dark={dark} />
+      {/* interior oscuro de los pasos de rueda */}
+      {s.wheels.map((w) => (
+        <path
+          key={`in-${w.cx}`}
+          d={`M${w.cx - s.archR + 1},${s.rockerY} A${s.archR - 1},${s.archR - 1} 0 0 1 ${w.cx + s.archR - 1},${s.rockerY} Z`}
+          fill="#0c0f14"
+        />
       ))}
 
-      <path d={cfg.body} fill={`url(#grad-${uid})`} stroke="#0d1a2e" strokeWidth="2.5" strokeLinejoin="round" />
+      {s.wheels.map((w) => (
+        <Wheel key={w.cx} cx={w.cx} r={w.r} uid={uid} />
+      ))}
 
-      {cfg.cladding && <path d={cfg.cladding} fill="#22262c" stroke="#0d1a2e" strokeWidth="1.5" />}
+      {/* carrocería */}
+      <path d={s.body} fill={`url(#paint-${uid})`} />
 
-      <path d={cfg.glass} fill={`url(#glass-${uid})`} stroke="#0d1a2e" strokeWidth="1.5" strokeLinejoin="round" />
-      <polygon
-        points="0,220 90,220 220,-20 130,-20"
-        fill="rgba(255,255,255,0.32)"
-        clipPath={`url(#glassclip-${uid})`}
-      />
+      <g clipPath={`url(#bodyclip-${uid})`}>
+        {/* reflejo en el hombro */}
+        <path d={s.crease} stroke="#fff" strokeOpacity="0.28" strokeWidth="7" fill="none" transform="translate(0,-5)" />
+        <path d={s.crease} stroke={outline} strokeOpacity="0.35" strokeWidth="1.2" fill="none" />
+        {/* zócalo inferior más oscuro */}
+        <rect x="0" y={s.rockerY - 10} width="400" height="12" fill={dark} opacity="0.55" />
+        {s.cladding && <rect x="0" y={s.rockerY - 14} width="400" height="16" fill="#23272e" />}
+        {s.doors.map((d) => (
+          <path key={d} d={d} stroke={outline} strokeOpacity="0.45" strokeWidth="1.2" fill="none" />
+        ))}
+      </g>
 
-      <line
-        x1={cfg.pillar.x1}
-        y1={cfg.pillar.y1}
-        x2={cfg.pillar.x2}
-        y2={cfg.pillar.y2}
-        stroke="#0d1a2e"
-        strokeWidth="2.5"
-      />
-      <path d={cfg.belt} stroke={dark} strokeWidth="1.5" fill="none" opacity="0.6" />
+      {/* molduras de los pasos de rueda */}
+      {s.wheels.map((w) => (
+        <path
+          key={`arch-${w.cx}`}
+          d={`M${w.cx - s.archR},${s.rockerY} A${s.archR},${s.archR} 0 0 1 ${w.cx + s.archR},${s.rockerY}`}
+          fill="none"
+          stroke={s.cladding ? '#23272e' : outline}
+          strokeWidth={s.cladding ? 6 : 1.5}
+          strokeOpacity={s.cladding ? 1 : 0.6}
+        />
+      ))}
 
-      {/* óptica delantera */}
-      <rect
-        x={cfg.headlight.x}
-        y={cfg.headlight.y}
-        width={cfg.headlight.w}
-        height={cfg.headlight.h}
-        rx="3"
-        transform={`rotate(${cfg.headlight.rotate} ${cfg.headlight.x + cfg.headlight.w / 2} ${cfg.headlight.y + cfg.headlight.h / 2})`}
-        fill="#f4d78a"
-        stroke="#0d1a2e"
-        strokeWidth="1.2"
-      />
-      {/* óptica trasera */}
-      <rect
-        x={cfg.taillight.x}
-        y={cfg.taillight.y}
-        width={cfg.taillight.w}
-        height={cfg.taillight.h}
-        rx="2.5"
-        fill="#c0392b"
-        stroke="#0d1a2e"
-        strokeWidth="1"
-      />
-      {/* manija */}
-      <rect
-        x={cfg.handle.x}
-        y={cfg.handle.y}
-        width={cfg.handle.w}
-        height={cfg.handle.h}
-        rx="2.5"
-        fill="#0d1a2e"
-        opacity="0.5"
-      />
-      {/* espejo retrovisor */}
-      <path d={cfg.mirrorPath} fill={dark} stroke="#0d1a2e" strokeWidth="1" />
+      {/* vidrios */}
+      <path d={s.glass} fill={`url(#glass-${uid})`} />
+      <g clipPath={`url(#glassclip-${uid})`}>
+        <polygon points="150,0 196,0 150,190 104,190" fill="#fff" opacity="0.14" />
+        <polygon points="206,0 218,0 172,190 160,190" fill="#fff" opacity="0.1" />
+      </g>
+      {s.pillars.map((p) => (
+        <path key={p} d={p} fill="#11161e" />
+      ))}
 
-      {/* detalles extra: pickup: caja/rollbar, SUV: rack de techo */}
-      {tipo === 'Pickup' && (
-        <>
-          <rect x="50" y="100" width="176" height="4" fill="#0d1a2e" opacity="0.55" />
-          <path d="M198,104 L198,66" stroke="#0d1a2e" strokeWidth="4" strokeLinecap="round" />
-          <path d="M220,104 L220,66" stroke="#0d1a2e" strokeWidth="4" strokeLinecap="round" />
-          <path d="M198,66 L220,66" stroke="#0d1a2e" strokeWidth="4" strokeLinecap="round" />
-        </>
+      {/* caja de la pickup */}
+      {s.extra === 'bed' && (
+        <g>
+          <path d="M22,91 L185,91" stroke="#1b2029" strokeWidth="3" />
+          <path d="M26,92 L26,132" stroke={outline} strokeOpacity="0.45" strokeWidth="1.2" />
+          <path d="M150,88 L158,64 L186,64" fill="none" stroke="#1b2029" strokeWidth="4" strokeLinejoin="round" strokeLinecap="round" />
+          <rect x="14" y="132" width="22" height="7" rx="2" fill="#2d333c" />
+        </g>
       )}
-      {tipo === 'SUV' && <rect x="140" y="44" width="76" height="5" rx="2" fill="#0d1a2e" opacity="0.8" />}
+      {/* barras de techo del SUV */}
+      {s.extra === 'rack' && (
+        <g fill="#1b2029">
+          <rect x="84" y="45" width="150" height="3.5" rx="1.5" />
+          <rect x="94" y="47" width="6" height="5" rx="1" />
+          <rect x="218" y="47" width="6" height="5" rx="1" />
+        </g>
+      )}
+
+      {/* ópticas, espejo, manijas */}
+      <path d={s.headlight} fill="#fdf3d2" stroke={outline} strokeWidth="1" />
+      <path d={s.taillight} fill="#b3261e" stroke={outline} strokeWidth="1" />
+      <path d={s.mirror} fill={dark} />
+      {s.handles.map((h) => (
+        <rect key={h.x} x={h.x} y={h.y} width="14" height="3.5" rx="1.75" fill={outline} opacity="0.55" />
+      ))}
+
+      {/* contorno fino */}
+      <path d={s.body} fill="none" stroke={outline} strokeWidth="1.4" strokeLinejoin="round" />
     </svg>
   )
 }
