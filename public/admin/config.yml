@@ -1,0 +1,44 @@
+backend:
+  name: github
+  repo: MarianoRama/minas-demo-automotora
+  branch: main
+
+media_folder: public/uploads
+public_folder: /minas-demo-automotora/uploads
+publish_mode: editorial_workflow
+locale: es
+
+collections:
+  - name: inventario
+    label: Inventario de autos
+    files:
+      - name: autos
+        label: Autos publicados
+        file: src/data/cars.json
+        format: json
+        fields:
+          - name: autos
+            label: Vehículos
+            widget: list
+            summary: '{{fields.marca}} {{fields.modelo}} · {{fields.anio}}'
+            fields:
+              - { name: id, label: ID, widget: number, value_type: int, min: 1 }
+              - { name: marca, label: Marca, widget: string }
+              - { name: modelo, label: Modelo, widget: string }
+              - { name: anio, label: Año, widget: number, value_type: int, min: 1900, max: 2100 }
+              - { name: precio, label: Precio en USD, widget: number, value_type: int, min: 0 }
+              - { name: km, label: Kilometraje, widget: number, value_type: int, min: 0 }
+              - name: estado
+                label: Estado de publicación
+                widget: select
+                options: [Borrador, Disponible, Vendido]
+                default: Borrador
+              - name: tipo
+                label: Tipo
+                widget: select
+                options: ['Sedán', SUV, 'Pick-up']
+              - name: imagenes
+                label: Fotos del vehículo
+                widget: list
+                required: false
+                field: { label: Foto, name: foto, widget: image }

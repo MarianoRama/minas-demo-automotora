@@ -13,11 +13,11 @@ export default function Ubicacion() {
             Dónde estamos
           </h2>
           <p className="mt-2 text-slate-600">
-            Ruta 8 km 121, Minas, Lavalleja, Uruguay (dirección de ejemplo)
+            Minas, Lavalleja, Uruguay (dirección de ejemplo)
           </p>
           <div className="mt-6 overflow-hidden rounded-xl shadow-sm ring-1 ring-slate-200">
             <iframe
-              title="Ubicación de Automotora Ruta 8 en Minas, Uruguay"
+              title="Mapa de Minas, Uruguay; ubicación ilustrativa"
               src="https://www.google.com/maps?q=Minas,+Uruguay&output=embed"
               className="h-72 w-full border-0"
               loading="lazy"
@@ -42,10 +42,8 @@ export default function Ubicacion() {
 
           <div className="mt-6 rounded-xl bg-blue-900 p-5 text-white">
             <p className="text-sm text-blue-200">¿Preferís hablar directo?</p>
-            <p className="mt-1 text-lg font-semibold">+598 99 000 000</p>
-            <p className="mt-1 text-sm text-blue-200">
-              contacto@automotoraruta8.uy (ejemplo)
-            </p>
+            <p className="mt-1 text-lg font-semibold">Contacto a configurar</p>
+            <p className="mt-1 text-sm text-blue-200">El teléfono se agrega al publicar el sitio.</p>
           </div>
         </div>
       </div>

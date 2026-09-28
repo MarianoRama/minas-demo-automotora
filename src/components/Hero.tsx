@@ -1,4 +1,15 @@
+import { autosPublicados } from '../data/cars'
+import { WhatsAppAction } from './WhatsAppAction'
+
+const precio = new Intl.NumberFormat('es-UY', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0,
+})
+
 export default function Hero() {
+  const destacado = autosPublicados.find((auto) => auto.estado === 'Disponible')
+
   return (
     <section
       id="inicio"
@@ -10,12 +21,11 @@ export default function Hero() {
             Minas, Uruguay
           </p>
           <h1 className="text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">
-            Autos usados de confianza, listos para rodar
+            Autos usados en Minas, con opciones para cada día
           </h1>
           <p className="mt-4 max-w-md text-slate-300">
-            En Automotora Ruta 8 revisamos cada vehículo antes de ofrecerlo.
-            Financiación, permuta y garantía de motor y caja en toda la
-            flota.
+            Conocé el inventario, compará opciones y consultá directamente por el vehículo que te
+            interesa. Coordinamos la visita y respondemos tus dudas.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a
@@ -33,38 +43,43 @@ export default function Hero() {
           </div>
         </div>
 
-        <div className="relative flex justify-center">
-          <svg
-            viewBox="0 0 400 220"
-            className="w-full max-w-md drop-shadow-2xl"
-            role="img"
-            aria-label="Ilustración de un auto estilizado"
-          >
-            <defs>
-              <linearGradient id="carBody" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#60a5fa" />
-                <stop offset="100%" stopColor="#1d4ed8" />
-              </linearGradient>
-            </defs>
-            <ellipse cx="200" cy="190" rx="170" ry="14" fill="#0f172a" opacity="0.5" />
-            <path
-              d="M40 140 L60 95 Q75 75 100 75 L150 75 L175 50 Q185 42 200 42 L260 42 Q275 42 285 55 L305 75 L340 80 Q365 85 365 115 L365 140 Z"
-              fill="url(#carBody)"
-            />
-            <path
-              d="M170 75 L190 55 Q198 48 208 48 L255 48 Q265 48 272 58 L288 75 Z"
-              fill="#dbeafe"
-              opacity="0.85"
-            />
-            <rect x="40" y="130" width="325" height="14" rx="6" fill="#1e3a8a" />
-            <circle cx="110" cy="150" r="26" fill="#0f172a" />
-            <circle cx="110" cy="150" r="11" fill="#cbd5e1" />
-            <circle cx="300" cy="150" r="26" fill="#0f172a" />
-            <circle cx="300" cy="150" r="11" fill="#cbd5e1" />
-            <rect x="55" y="100" width="20" height="8" rx="4" fill="#fde68a" />
-            <rect x="330" y="100" width="20" height="8" rx="4" fill="#f87171" />
-          </svg>
-        </div>
+        {destacado ? (
+          <article className="w-full max-w-lg overflow-hidden rounded-2xl bg-white text-slate-900 shadow-2xl shadow-black/20">
+            {destacado.imagenes[0] ? (
+              <img
+                src={destacado.imagenes[0]}
+                alt={`${destacado.marca} ${destacado.modelo}; imagen ilustrativa`}
+                className="aspect-[4/3] w-full object-cover"
+                fetchPriority="high"
+              />
+            ) : (
+              <div className="flex aspect-[4/3] items-center justify-center bg-slate-100 px-4 text-center text-slate-600">Foto pendiente de cargar</div>
+            )}
+            <div className="flex flex-wrap items-end justify-between gap-4 p-5 sm:p-6">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-blue-700">Disponible</p>
+                <h2 className="mt-1 text-xl font-semibold">{destacado.marca} {destacado.modelo}</h2>
+                <p className="mt-1 text-sm text-slate-600">{destacado.anio} · {destacado.km.toLocaleString('es-UY')} km</p>
+                <p className="mt-1 text-xs text-slate-500">Foto ilustrativa; no corresponde a esta unidad de la demo.</p>
+              </div>
+              <div className="text-left sm:text-right">
+                <p className="text-lg font-bold">{precio.format(destacado.precio)}</p>
+                <WhatsAppAction
+                  label={`Consultar ${destacado.marca} ${destacado.modelo}`}
+                  message={`Hola, me interesa el ${destacado.marca} ${destacado.modelo} ${destacado.anio}.`}
+                  className="mt-2 inline-flex min-h-10 items-center font-semibold text-blue-800 underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
+                >
+                  Consultar vehículo
+                </WhatsAppAction>
+              </div>
+            </div>
+          </article>
+        ) : (
+          <div className="w-full max-w-lg rounded-2xl border border-slate-700 bg-slate-800 p-8 text-slate-200">
+            <p className="font-semibold text-white">Estamos actualizando el inventario</p>
+            <p className="mt-2 text-sm">Consultá más tarde para ver los vehículos disponibles.</p>
+          </div>
+        )}
       </div>
     </section>
   )

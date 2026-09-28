@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { WhatsAppAction } from './WhatsAppAction'
 
 interface FormState {
   marca: string
@@ -24,10 +25,7 @@ export default function VenderAuto() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    // Demo: no hay backend real, solo simulamos el envío.
-    console.log('Solicitud de tasación recibida:', form)
     setEnviado(true)
-    setForm(estadoInicial)
   }
 
   return (
@@ -38,14 +36,13 @@ export default function VenderAuto() {
             Vendé tu auto
           </h2>
           <p className="mt-3 text-slate-600">
-            Contanos las características de tu vehículo y te contactamos con
-            una tasación sin cargo. Trabajamos con toma de usados como parte
-            de pago.
+            Compartí los datos básicos de tu vehículo para preparar una consulta. En este ejemplo
+            no guardamos tus datos ni enviamos formularios a un servidor.
           </p>
           <ul className="mt-6 space-y-2 text-sm text-slate-600">
-            <li>✓ Tasación gratuita en el día</li>
-            <li>✓ Pago al contado o permuta</li>
-            <li>✓ Gestionamos toda la papelería</li>
+            <li>• Tasación a coordinar con el equipo</li>
+            <li>• Posibilidad de conversar una permuta</li>
+            <li>• Revisión de documentación del vehículo</li>
           </ul>
         </div>
 
@@ -98,7 +95,7 @@ export default function VenderAuto() {
                 required
                 type="number"
                 min="1980"
-                max="2026"
+                max={new Date().getFullYear()}
                 value={form.anio}
                 onChange={(e) => handleChange('anio', e.target.value)}
                 className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
@@ -132,9 +129,16 @@ export default function VenderAuto() {
           </button>
 
           {enviado && (
-            <p className="mt-4 rounded-md bg-green-50 px-3 py-2 text-sm font-medium text-green-700 ring-1 ring-green-200">
-              ¡Gracias! Recibimos tu solicitud, te contactamos a la brevedad.
-            </p>
+            <div className="mt-4 rounded-md bg-green-50 px-3 py-3 text-sm text-green-900 ring-1 ring-green-200" role="status">
+              <p>La demo no envió ni guardó estos datos. Podés preparar una consulta para WhatsApp:</p>
+              <WhatsAppAction
+                className="mt-2 inline-flex min-h-11 items-center rounded px-2 font-semibold underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2"
+                label="Copiar o continuar consulta de tasación en WhatsApp"
+                message={`Hola, quisiera consultar por una tasación. Vehículo: ${form.marca} ${form.modelo}, año ${form.anio}. Mi teléfono: ${form.telefono}.`}
+              >
+                Continuar por WhatsApp
+              </WhatsAppAction>
+            </div>
           )}
         </form>
       </div>
