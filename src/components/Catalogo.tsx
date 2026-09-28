@@ -16,6 +16,22 @@ const initial = {
   favoritos: false,
 };
 type Filters = typeof initial;
+type PageItem = number | "ellipsis";
+function pageItems(pageCount: number, current: number): PageItem[] {
+  if (pageCount <= 7) return Array.from({ length: pageCount }, (_, index) => index + 1);
+  const numbers = [...new Set([1, pageCount, current - 1, current, current + 1])]
+    .filter((number) => number >= 1 && number <= pageCount)
+    .sort((a, b) => a - b);
+  const items: PageItem[] = [];
+  let previous = 0;
+  for (const number of numbers) {
+    if (number - previous === 2) items.push(previous + 1);
+    else if (number - previous > 2) items.push("ellipsis");
+    items.push(number);
+    previous = number;
+  }
+  return items;
+}
 function Modal({
   title,
   children,
@@ -124,7 +140,9 @@ function VehicleDetail({ auto }: { auto: Auto }) {
   );
 }
 export default function Catalogo() {
+  const pageSize = 6;
   const [f, setF] = useState<Filters>(initial);
+  const [page, setPage] = useState(1);
   const [sort, setSort] = useState("recientes");
   const [filtersOpen, setFiltersOpen] = useState(
     () => window.matchMedia("(min-width: 761px)").matches,
@@ -133,8 +151,10 @@ export default function Catalogo() {
   const [compare, setCompare] = useState<number[]>([]);
   const [detail, setDetail] = useState<Auto | null>(null);
   const [comparison, setComparison] = useState(false);
-  const update = <K extends keyof Filters>(key: K, value: Filters[K]) =>
+  const update = <K extends keyof Filters>(key: K, value: Filters[K]) => {
     setF((old) => ({ ...old, [key]: value }));
+    setPage(1);
+  };
   const invalidPrice = f.min !== "" && f.max !== "" && +f.min > +f.max;
   const invalidYear = f.desde !== "" && f.hasta !== "" && +f.desde > +f.hasta;
   const filtered = useMemo(
@@ -167,6 +187,13 @@ export default function Catalogo() {
     [f, sort, saved],
   );
   const selected = autosPublicados.filter((a) => compare.includes(a.id));
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const firstVisible = filtered.length ? (page - 1) * pageSize + 1 : 0;
+  const lastVisible = Math.min(page * pageSize, filtered.length);
+  const pageAutos = filtered.slice((page - 1) * pageSize, page * pageSize);
+  useEffect(() => {
+    setPage((current) => Math.min(current, pageCount));
+  }, [pageCount]);
   const numeric = (
     key: "min" | "max" | "desde" | "hasta" | "km",
     label: string,
@@ -280,6 +307,7 @@ export default function Catalogo() {
                   onClick={() => {
                     setF(initial);
                     setSort("recientes");
+                    setPage(1);
                   }}
                 >
                   Limpiar filtros
@@ -301,7 +329,7 @@ export default function Catalogo() {
             </label>
             <div className="motor-results-toolbar">
               <p aria-live="polite">
-                <strong>{filtered.length}</strong>{" "}
+                <strong>{filtered.length ? `${firstVisible}–${lastVisible} de ${filtered.length}` : "0"}</strong>{" "}
                 {filtered.length === 1 ? "vehículo" : "vehículos"}
               </p>
               <label>
@@ -309,7 +337,7 @@ export default function Catalogo() {
                 <select
                   aria-label="Ordenar"
                   value={sort}
-                  onChange={(e) => setSort(e.target.value)}
+                  onChange={(e) => { setSort(e.target.value); setPage(1); }}
                 >
                   <option value="recientes">Más nuevos</option>
                   <option value="precio-asc">Menor precio</option>
@@ -319,7 +347,7 @@ export default function Catalogo() {
               </label>
             </div>
             <div className="motor-grid">
-              {filtered.map((a) => (
+              {pageAutos.map((a) => (
                 <article
                   key={a.id}
                   className="motor-card"
@@ -398,11 +426,22 @@ export default function Catalogo() {
                 </article>
               ))}
             </div>
+            {pageCount > 1 && (
+              <nav className="motor-pagination" aria-label="Paginación del catálogo de vehículos">
+                <button type="button" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={page === 1} aria-label="Página anterior">Anterior</button>
+                <div className="motor-page-numbers" aria-label="Páginas">
+                  {pageItems(pageCount, page).map((item, index) => item === "ellipsis"
+                    ? <span key={`ellipsis-${index}`} aria-hidden="true">…</span>
+                    : <button key={item} type="button" onClick={() => setPage(item)} aria-label={`Página ${item}`} aria-current={page === item ? "page" : undefined}>{item}</button>)}
+                </div>
+                <button type="button" onClick={() => setPage((current) => Math.min(pageCount, current + 1))} disabled={page === pageCount} aria-label="Página siguiente">Siguiente</button>
+              </nav>
+            )}
             {filtered.length === 0 && (
               <div className="motor-empty">
                 <h3>No hay vehículos con esa combinación.</h3>
                 <p>Probá ampliar el precio, el año o el kilometraje.</p>
-                <button className="motor-primary" onClick={() => setF(initial)}>
+                <button className="motor-primary" onClick={() => { setF(initial); setPage(1); }}>
                   Ver todos los vehículos
                 </button>
               </div>

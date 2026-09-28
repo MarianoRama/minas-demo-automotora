@@ -295,6 +295,29 @@ button:disabled {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 22px;
 }
+.motor-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+.motor-pagination button {
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0 11px;
+  border: 1px solid #cfd4cc;
+  border-radius: 3px;
+  background: #fff;
+  color: var(--motor-ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+.motor-pagination button:hover:not(:disabled) { border-color: var(--motor-red); }
+.motor-pagination button[aria-current="page"] { border-color: var(--motor-red); background: var(--motor-red); color: #fff; }
+.motor-pagination button:disabled { opacity: .45; cursor: not-allowed; }
+.motor-page-numbers { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 5px; }
 .motor-card {
   background: #fff;
   border: 1px solid #d9ddd4;
