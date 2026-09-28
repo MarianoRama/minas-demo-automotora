@@ -1,7 +1,8 @@
-import { NEGOCIO } from '../config'
+import { useDatos } from '../data/store'
 
 export default function WhatsAppButton() {
-  const url = `https://wa.me/${NEGOCIO.whatsapp}?text=${encodeURIComponent(
+  const { negocio } = useDatos()
+  const url = `https://wa.me/${negocio.whatsapp}?text=${encodeURIComponent(
     'Hola, quiero hacer una consulta sobre un auto.',
   )}`
 

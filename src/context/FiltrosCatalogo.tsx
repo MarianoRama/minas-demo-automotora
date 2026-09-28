@@ -1,45 +1,75 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
-import type { TipoCarroceria } from '../data/cars'
+import type { Caja, Combustible, TipoCarroceria } from '../data/cars'
 
-export type FiltroTipo = TipoCarroceria | 'Todos'
-export type FiltroMarca = string | 'Todas'
+export type Orden = 'destacados' | 'precio-asc' | 'precio-desc' | 'km-asc' | 'anio-desc'
 
-interface Filtros {
-  tipo: FiltroTipo
-  marca: FiltroMarca
+export interface Filtros {
+  tipos: TipoCarroceria[]
+  marcas: string[]
+  combustibles: Combustible[]
+  cajas: Caja[]
+  precioMin: number
   precioMax: number
+  anioDesde: number
+  kmMax: number
+  mostrarVendidos: boolean
+  soloDestacados: boolean
+  soloRecienIngresados: boolean
+  soloElectrificados: boolean
+  soloFinanciables: boolean
   busqueda: string
+  orden: Orden
+}
+
+export const filtrosIniciales: Filtros = {
+  tipos: [],
+  marcas: [],
+  combustibles: [],
+  cajas: [],
+  precioMin: 0,
+  precioMax: Number.POSITIVE_INFINITY,
+  anioDesde: 0,
+  kmMax: Number.POSITIVE_INFINITY,
+  mostrarVendidos: false,
+  soloDestacados: false,
+  soloRecienIngresados: false,
+  soloElectrificados: false,
+  soloFinanciables: false,
+  busqueda: '',
+  orden: 'destacados',
 }
 
 interface FiltrosContextValue {
   filtros: Filtros
-  setTipo: (v: FiltroTipo) => void
-  setMarca: (v: FiltroMarca) => void
-  setPrecioMax: (v: number) => void
-  setBusqueda: (v: string) => void
+  setFiltros: (v: Filtros | ((f: Filtros) => Filtros)) => void
+  actualizar: (parcial: Partial<Filtros>) => void
+  alternarValor: <K extends 'tipos' | 'marcas' | 'combustibles' | 'cajas'>(
+    campo: K,
+    valor: Filtros[K][number],
+  ) => void
+  limpiar: () => void
   aplicarBusquedaRapida: (v: Partial<Filtros>) => void
-}
-
-const valoresIniciales: Filtros = {
-  tipo: 'Todos',
-  marca: 'Todas',
-  precioMax: Number.POSITIVE_INFINITY,
-  busqueda: '',
 }
 
 const FiltrosContext = createContext<FiltrosContextValue | null>(null)
 
 export function FiltrosProvider({ children }: { children: ReactNode }) {
-  const [filtros, setFiltros] = useState<Filtros>(valoresIniciales)
+  const [filtros, setFiltros] = useState<Filtros>(filtrosIniciales)
 
   const value = useMemo<FiltrosContextValue>(
     () => ({
       filtros,
-      setTipo: (tipo) => setFiltros((f) => ({ ...f, tipo })),
-      setMarca: (marca) => setFiltros((f) => ({ ...f, marca })),
-      setPrecioMax: (precioMax) => setFiltros((f) => ({ ...f, precioMax })),
-      setBusqueda: (busqueda) => setFiltros((f) => ({ ...f, busqueda })),
-      aplicarBusquedaRapida: (parcial) => setFiltros((f) => ({ ...f, ...parcial })),
+      setFiltros,
+      actualizar: (parcial) => setFiltros((f) => ({ ...f, ...parcial })),
+      alternarValor: (campo, valor) =>
+        setFiltros((f) => {
+          const lista = f[campo] as unknown[]
+          const yaEsta = lista.includes(valor)
+          const nueva = yaEsta ? lista.filter((v) => v !== valor) : [...lista, valor]
+          return { ...f, [campo]: nueva }
+        }),
+      limpiar: () => setFiltros(filtrosIniciales),
+      aplicarBusquedaRapida: (parcial) => setFiltros({ ...filtrosIniciales, ...parcial }),
     }),
     [filtros],
   )

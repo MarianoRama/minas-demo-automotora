@@ -1,16 +1,18 @@
 import { useMemo, useState } from 'react'
-import { autos } from '../data/cars'
+import { useDatos } from '../data/store'
 import { formatoPrecio } from '../lib/formato'
 import Reveal from './Reveal'
 
-const TASA_MENSUAL_ILUSTRATIVA = 0.032 // 3,2% mensual — ejemplo, no es oferta real
 const plazos = [12, 24, 36, 48] as const
 
 export default function Financiacion() {
-  const precioMedio = useMemo(
-    () => Math.round(autos.reduce((acc, a) => acc + a.precio, 0) / autos.length / 100) * 100,
-    [],
-  )
+  const { autos, negocio } = useDatos()
+  const tasaMensual = negocio.tasaMensual
+
+  const precioMedio = useMemo(() => {
+    if (autos.length === 0) return 15000
+    return Math.round(autos.reduce((acc, a) => acc + a.precio, 0) / autos.length / 100) * 100
+  }, [autos])
 
   const [precio, setPrecio] = useState(precioMedio)
   const [entregaPct, setEntregaPct] = useState(30)
@@ -18,7 +20,7 @@ export default function Financiacion() {
 
   const entrega = Math.round((precio * entregaPct) / 100)
   const financiado = precio - entrega
-  const cuota = calcularCuota(financiado, TASA_MENSUAL_ILUSTRATIVA, plazo)
+  const cuota = calcularCuota(financiado, tasaMensual, plazo)
 
   return (
     <section id="financiacion" className="bg-tinta py-16 text-hueso sm:py-20">
@@ -30,12 +32,12 @@ export default function Financiacion() {
             </h2>
             <p className="mt-2 max-w-xl text-hueso/70">
               Entregá tu usado o parte del pago en efectivo y financiá el resto en cuotas
-              fijas en pesos. Esto es un ejemplo para orientarte — la cuota real se calcula
-              con el vehículo y tu perfil el día de la operación.
+              fijas en pesos. Es un ejemplo para orientarte, la cuota real se calcula con
+              el vehículo y tu perfil el día de la operación.
             </p>
           </div>
           <p className="rounded-sm bg-senal/15 px-3 py-2 text-xs font-bold uppercase tracking-wide text-senal">
-            Tasa de ejemplo: {(TASA_MENSUAL_ILUSTRATIVA * 100).toFixed(1)}% mensual · ilustrativa
+            Tasa de ejemplo: {(tasaMensual * 100).toFixed(1)}% mensual, ilustrativa
           </p>
         </Reveal>
 
@@ -123,7 +125,7 @@ export default function Financiacion() {
               </div>
               <div className="flex justify-between">
                 <dt className="text-texto/60">Tasa mensual (ejemplo)</dt>
-                <dd className="font-semibold">{(TASA_MENSUAL_ILUSTRATIVA * 100).toFixed(1)}%</dd>
+                <dd className="font-semibold">{(tasaMensual * 100).toFixed(1)}%</dd>
               </div>
             </dl>
             <p className="mt-4 text-xs leading-relaxed text-texto/55">

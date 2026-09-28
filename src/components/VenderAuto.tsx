@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
-import { NEGOCIO } from '../config'
+import { useDatos } from '../data/store'
 import Reveal from './Reveal'
 
 interface FormState {
@@ -21,6 +21,7 @@ const estadoInicial: FormState = {
 }
 
 export default function VenderAuto() {
+  const { negocio } = useDatos()
   const [form, setForm] = useState<FormState>(estadoInicial)
 
   function handleChange(campo: keyof FormState, valor: string) {
@@ -37,7 +38,7 @@ export default function VenderAuto() {
       form.telefono && `Mi teléfono: ${form.telefono}`,
     ].filter(Boolean)
     const mensaje = partes.join('\n')
-    const url = `https://wa.me/${NEGOCIO.whatsapp}?text=${encodeURIComponent(mensaje)}`
+    const url = `https://wa.me/${negocio.whatsapp}?text=${encodeURIComponent(mensaje)}`
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 

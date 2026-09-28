@@ -1,42 +1,28 @@
 import { type FormEvent, useState } from 'react'
 import { ArrowRight, Car, CalendarCheck } from 'lucide-react'
 import CarIllustration from './CarIllustration'
-import { NEGOCIO } from '../config'
-import { autos, tiposCarroceria, type TipoCarroceria } from '../data/cars'
+import SelloEstado from './SelloEstado'
+import { useDatos } from '../data/store'
+import { tiposCarroceria, type TipoCarroceria } from '../data/cars'
 import { formatoKm, formatoPrecio } from '../lib/formato'
-import { useFiltrosCatalogo, type FiltroTipo } from '../context/FiltrosCatalogo'
-
-const anioActual = new Date().getFullYear()
-const aniosOperando = anioActual - NEGOCIO.anioFundacion
-
-const stats = [
-  { valor: `${aniosOperando}+`, detalle: 'Años de trayectoria' },
-  { valor: '600+', detalle: 'Autos entregados' },
-  { valor: '90 días', detalle: 'Garantía de motor y caja' },
-]
-
-const marcas = Array.from(new Set(autos.map((a) => a.marca))).sort()
-
-const rangosPrecio = [
-  { valor: 'todos', label: 'Precio' },
-  { valor: '15000', label: 'Hasta U$S 15.000' },
-  { valor: '22000', label: 'Hasta U$S 22.000' },
-  { valor: '30000', label: 'Hasta U$S 30.000' },
-]
-
-const destacado = autos.find((a) => a.id === 'hilux-srv') ?? autos[0]
+import { useFiltrosCatalogo } from '../context/FiltrosCatalogo'
 
 export default function Hero() {
+  const { autos, negocio } = useDatos()
   const { aplicarBusquedaRapida } = useFiltrosCatalogo()
-  const [tipo, setTipo] = useState<FiltroTipo>('Todos')
+  const [tipo, setTipo] = useState<TipoCarroceria | 'Todos'>('Todos')
   const [marca, setMarca] = useState<'Todas' | string>('Todas')
   const [precio, setPrecio] = useState('todos')
+
+  const marcas = Array.from(new Set(autos.map((a) => a.marca))).sort()
+  const disponibles = autos.filter((a) => a.estado === 'Disponible')
+  const destacado = autos.find((a) => a.id === 'hilux-srv' && a.estado === 'Disponible') ?? disponibles[0] ?? autos[0]
 
   function buscar(e: FormEvent) {
     e.preventDefault()
     aplicarBusquedaRapida({
-      tipo,
-      marca,
+      tipos: tipo === 'Todos' ? [] : [tipo],
+      marcas: marca === 'Todas' ? [] : [marca],
       precioMax: precio === 'todos' ? Number.POSITIVE_INFINITY : Number(precio),
     })
     document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -48,30 +34,28 @@ export default function Hero() {
         <div className="flex flex-col justify-center">
           <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-senal-2">
             <span aria-hidden="true" className="h-px w-7 bg-senal-2" />
-            Concesionaria en Minas
+            Desde {negocio.anioFundacion}, en Ruta 8
           </p>
 
           <h1 className="mt-4 font-display text-[clamp(2.3rem,5.4vw,3.6rem)] font-black leading-[1.02] tracking-tight text-tinta">
-            Tu próximo auto
+            Venimos, probás
             <br />
-            ya pasó nuestra
+            el auto y te vas
             <br />
-            revisión.
+            sabiendo qué comprás.
           </h1>
 
           <p className="mt-5 max-w-md text-[clamp(1rem,1.6vw,1.125rem)] text-texto/80">
-            Mecánica, chapa y papeles al día antes de tener precio.
-            Financiación propia, permuta y trámite de transferencia
-            incluido.
+            Cada unidad pasa por el taller antes de tener cartel de precio. Si algo
+            no cierra, no entra al playón. Podés venir a probarlo vos mismo, sin sacar turno.
           </p>
 
-          <span className="mt-5 inline-flex w-fit items-center gap-2 rounded-sm bg-white px-3 py-2 text-xs font-bold text-tinta ring-1 ring-linea">
-            <span
-              aria-hidden="true"
-              className="h-2 w-2 rounded-full bg-green-600 motion-safe:animate-pulse"
-            />
-            {autos.length} vehículos disponibles hoy
-          </span>
+          {negocio.avisoHome && (
+            <p className="mt-5 inline-flex w-fit -rotate-1 items-start gap-2 border border-dashed border-senal-2/60 bg-hueso-2 px-3 py-2 text-sm text-texto/80">
+              <span aria-hidden="true" className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-senal-2" />
+              {negocio.avisoHome}
+            </p>
+          )}
 
           <div className="mt-6 flex flex-wrap gap-3">
             <a
@@ -131,11 +115,10 @@ export default function Hero() {
                 onChange={(e) => setPrecio(e.target.value)}
                 className="min-h-11 w-full rounded-sm border border-linea px-2 text-sm focus:border-tinta focus:outline-none"
               >
-                {rangosPrecio.map((r) => (
-                  <option key={r.valor} value={r.valor}>
-                    {r.label}
-                  </option>
-                ))}
+                <option value="todos">Precio</option>
+                <option value="15000">Hasta U$S 15.000</option>
+                <option value="22000">Hasta U$S 22.000</option>
+                <option value="30000">Hasta U$S 30.000</option>
               </select>
             </label>
             <button
@@ -145,19 +128,6 @@ export default function Hero() {
               Buscar
             </button>
           </form>
-
-          <div className="mt-8 grid grid-cols-3 gap-6 border-t border-linea pt-6">
-            {stats.map((s) => (
-              <div key={s.detalle}>
-                <p className="tabular font-display text-2xl font-extrabold text-tinta sm:text-3xl">
-                  {s.valor}
-                </p>
-                <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-texto/55 sm:text-xs">
-                  {s.detalle}
-                </p>
-              </div>
-            ))}
-          </div>
         </div>
 
         <div className="relative flex flex-col justify-center md:-mr-10 lg:-mr-16">
@@ -168,6 +138,7 @@ export default function Hero() {
               titulo={`${destacado.marca} ${destacado.modelo}, vehículo destacado`}
               className="w-full drop-shadow-[0_22px_30px_rgba(18,35,63,0.28)] md:w-[115%]"
             />
+            <SelloEstado estado={destacado.estado} />
           </div>
 
           <a

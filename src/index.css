@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "@fontsource-variable/archivo";
 @import "@fontsource-variable/inter";
+@import "@fontsource/permanent-marker";
 
 @theme {
   --color-hueso: #f7f3ea;
@@ -12,9 +13,12 @@
   --color-senal-2: #b84f19;
   --color-linea: #ddd4c1;
   --color-texto: #1c2430;
+  --color-cartulina: #fdf8e8;
+  --color-cartel-tinta: #1e2a1c;
 
   --font-display: "Archivo Variable", "Archivo", sans-serif;
   --font-sans: "Inter Variable", "Inter", sans-serif;
+  --font-marcador: "Permanent Marker", cursive;
 }
 
 @layer base {

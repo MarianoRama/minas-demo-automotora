@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Menu, Phone, X } from 'lucide-react'
-import { NEGOCIO } from '../config'
+import { useDatos } from '../data/store'
 
 const links = [
   { href: '#catalogo', label: 'Vehículos' },
@@ -11,18 +11,19 @@ const links = [
 ]
 
 export default function Header() {
+  const { negocio } = useDatos()
   const [open, setOpen] = useState(false)
-  const linkContacto = `https://wa.me/${NEGOCIO.whatsapp}?text=${encodeURIComponent('Hola, quiero hacer una consulta.')}`
+  const linkContacto = `https://wa.me/${negocio.whatsapp}?text=${encodeURIComponent('Hola, quiero hacer una consulta.')}`
 
   return (
     <header className="sticky top-0 z-40 border-b border-tinta-3/40 bg-tinta text-hueso">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
         <a href="#inicio" className="flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-sm bg-senal font-display text-lg font-bold text-tinta">
-            {NEGOCIO.inicial}
+            {negocio.inicial}
           </span>
           <span className="font-display text-base font-bold uppercase tracking-tight sm:text-lg">
-            {NEGOCIO.nombre}
+            {negocio.nombre}
           </span>
         </a>
 

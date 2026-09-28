@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { Check, Share2, CalendarCheck, X } from 'lucide-react'
 import type { Auto } from '../data/cars'
-import { NEGOCIO } from '../config'
+import { useDatos } from '../data/store'
 import { formatoKm, formatoPrecio } from '../lib/formato'
 import CarIllustration from './CarIllustration'
+import CartelParabrisas from './CartelParabrisas'
+import SelloEstado from './SelloEstado'
 
 interface Props {
   auto: Auto
@@ -11,6 +13,7 @@ interface Props {
 }
 
 export default function AutoDetalle({ auto, onClose }: Props) {
+  const { negocio } = useDatos()
   const cerrarRef = useRef<HTMLButtonElement>(null)
   const [copiado, setCopiado] = useState(false)
 
@@ -29,14 +32,14 @@ export default function AutoDetalle({ auto, onClose }: Props) {
 
   const mensajeConsulta = `Hola, te escribo por el ${auto.marca} ${auto.modelo} ${auto.version} ${auto.anio} que vi en el sitio (U$S ${auto.precio.toLocaleString('es-UY')}). ¿Sigue disponible?`
   const mensajeVisita = `Hola, quiero coordinar una visita para ver y probar el ${auto.marca} ${auto.modelo} ${auto.version} ${auto.anio}.`
-  const linkWhatsapp = `https://wa.me/${NEGOCIO.whatsapp}?text=${encodeURIComponent(mensajeConsulta)}`
-  const linkVisita = `https://wa.me/${NEGOCIO.whatsapp}?text=${encodeURIComponent(mensajeVisita)}`
+  const linkWhatsapp = `https://wa.me/${negocio.whatsapp}?text=${encodeURIComponent(mensajeConsulta)}`
+  const linkVisita = `https://wa.me/${negocio.whatsapp}?text=${encodeURIComponent(mensajeVisita)}`
 
   async function compartir() {
     const url = window.location.href.split('#')[0] + '#catalogo'
     const data = {
-      title: `${auto.marca} ${auto.modelo} — ${NEGOCIO.nombre}`,
-      text: `Mirá este ${auto.marca} ${auto.modelo} ${auto.anio} en ${NEGOCIO.nombre}: ${formatoPrecio(auto.precio)}`,
+      title: `${auto.marca} ${auto.modelo}, ${negocio.nombre}`,
+      text: `Mirá este ${auto.marca} ${auto.modelo} ${auto.anio} en ${negocio.nombre}: ${formatoPrecio(auto.precio)}`,
       url,
     }
     try {
@@ -107,14 +110,17 @@ export default function AutoDetalle({ auto, onClose }: Props) {
             </p>
             {auto.destacado && (
               <span className="rounded-sm bg-senal px-2 py-1 text-xs font-bold uppercase tracking-wide text-tinta">
-                {auto.destacado}
+                Destacado
               </span>
             )}
           </div>
           <p className="mt-2 text-sm text-texto/75">{auto.descripcion}</p>
         </div>
 
-        <div className="mt-4 flex items-center justify-center bg-hueso-2 px-5 py-6 sm:px-6">
+        <div className="relative mt-4 flex items-center justify-center bg-hueso-2 px-5 py-6 sm:px-6">
+          {auto.etiqueta && (
+            <CartelParabrisas texto={auto.etiqueta} rotacion={3} className="absolute right-6 top-4 z-10 sm:right-10" />
+          )}
           {auto.foto ? (
             <img
               src={auto.foto}
@@ -129,6 +135,7 @@ export default function AutoDetalle({ auto, onClose }: Props) {
               className="w-full max-w-sm"
             />
           )}
+          <SelloEstado estado={auto.estado} />
         </div>
 
         <div className="px-5 py-5 sm:px-6">
@@ -159,7 +166,7 @@ export default function AutoDetalle({ auto, onClose }: Props) {
           </div>
 
           <p className="mt-4 text-xs text-texto/55">
-            Precio de contado. Aceptamos permuta y financiación propia — mirá el simulador
+            Precio de contado. Aceptamos permuta y financiación propia: mirá el simulador
             más abajo en el sitio.
           </p>
         </div>

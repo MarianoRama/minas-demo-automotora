@@ -1,53 +1,37 @@
-import { autos, type Auto } from '../data/cars'
-import { NEGOCIO } from '../config'
+import { useDatos } from '../data/store'
+import type { Auto } from '../data/cars'
 import { formatoKm, formatoPrecio } from '../lib/formato'
 import { useReveal, revealClases } from '../hooks/useReveal'
 import CarIllustration from './CarIllustration'
-
-type Badge = { texto: string; clase: string }
+import CartelParabrisas from './CartelParabrisas'
+import SelloEstado from './SelloEstado'
 
 interface Props {
   auto: Auto
   delay: number
   onVerFicha: (auto: Auto) => void
-  /**
-   * Insignia a mostrar. Si se omite, se calcula con la prioridad por
-   * defecto (destacado > eléctrico > recién ingresado). Se usa para que
-   * las filas curadas (Destacados, Recién ingresados, etc.) muestren
-   * siempre la insignia que corresponde a esa categoría, en vez de la
-   * que le tocaría al auto por prioridad general.
-   */
-  badge?: Badge | null
 }
 
-const anioMasNuevo = Math.max(...autos.map((a) => a.anio))
-
-export const BADGES = {
-  destacado: { texto: 'Destacado', clase: 'bg-senal text-tinta' } satisfies Badge,
-  electrico: { texto: 'Eléctrico', clase: 'bg-tinta-3 text-hueso' } satisfies Badge,
-  automatica: { texto: 'Automática', clase: 'bg-sky-800 text-hueso' } satisfies Badge,
-  recienIngresado: { texto: 'Recién ingresado', clase: 'bg-emerald-700 text-hueso' } satisfies Badge,
-}
-
-function badgePorDefecto(auto: Auto): Badge | null {
-  if (auto.destacado) return BADGES.destacado
-  if (auto.combustible === 'Eléctrico') return BADGES.electrico
-  if (anioMasNuevo - auto.anio <= 1) return BADGES.recienIngresado
+function badgePorDefecto(auto: Auto): { texto: string; clase: string } | null {
+  if (auto.destacado) return { texto: 'Destacado', clase: 'bg-senal text-tinta' }
+  if (auto.combustible === 'Eléctrico') return { texto: 'Eléctrico', clase: 'bg-tinta-3 text-hueso' }
+  if (auto.combustible === 'Híbrido') return { texto: 'Híbrido', clase: 'bg-emerald-800 text-hueso' }
   return null
 }
 
-export default function AutoCard({ auto, delay, onVerFicha, badge }: Props) {
+export default function AutoCard({ auto, delay, onVerFicha }: Props) {
+  const { negocio } = useDatos()
   const { ref, visible } = useReveal<HTMLElement>(delay)
 
   const mensaje = `Hola, te escribo por el ${auto.marca} ${auto.modelo} ${auto.version} ${auto.anio} (U$S ${auto.precio.toLocaleString('es-UY')}). ¿Sigue disponible?`
-  const linkWhatsapp = `https://wa.me/${NEGOCIO.whatsapp}?text=${encodeURIComponent(mensaje)}`
+  const linkWhatsapp = `https://wa.me/${negocio.whatsapp}?text=${encodeURIComponent(mensaje)}`
 
-  const badgeFinal = badge !== undefined ? badge : badgePorDefecto(auto)
+  const badge = badgePorDefecto(auto)
 
   return (
     <article
       ref={ref}
-      className={`group flex flex-col overflow-hidden rounded-sm bg-white ring-1 ring-linea transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] hover:shadow-xl hover:ring-tinta/50 ${revealClases(visible)}`}
+      className={`group flex flex-col overflow-hidden border border-linea bg-white transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] hover:border-tinta/50 hover:shadow-[6px_6px_0_var(--color-tinta)] ${revealClases(visible)}`}
     >
       <button
         type="button"
@@ -56,16 +40,23 @@ export default function AutoCard({ auto, delay, onVerFicha, badge }: Props) {
         aria-label={`Ver ficha de ${auto.marca} ${auto.modelo}`}
       >
         <div className="relative overflow-hidden bg-hueso-2 px-4 pt-4">
-          {badgeFinal && (
-            <span className={`absolute left-3 top-3 z-10 rounded-sm px-2 py-1 text-[11px] font-bold uppercase tracking-wide ${badgeFinal.clase}`}>
-              {badgeFinal.texto}
+          {badge && (
+            <span className={`absolute left-3 top-3 z-10 px-2 py-1 text-[11px] font-bold uppercase tracking-wide ${badge.clase}`}>
+              {badge.texto}
             </span>
+          )}
+          {auto.etiqueta && (
+            <CartelParabrisas
+              texto={auto.etiqueta}
+              rotacion={-4}
+              className="absolute right-3 top-3 z-10"
+            />
           )}
           {auto.foto ? (
             <img
               src={auto.foto}
               alt={`${auto.marca} ${auto.modelo} ${auto.version}`}
-              className="h-48 w-full rounded-t-sm object-cover transition duration-300 ease-out group-hover:scale-105"
+              className="h-48 w-full object-cover transition duration-300 ease-out group-hover:scale-105"
               loading="lazy"
             />
           ) : (
@@ -76,6 +67,7 @@ export default function AutoCard({ auto, delay, onVerFicha, badge }: Props) {
               className="h-48 w-full transition duration-300 ease-out group-hover:scale-105"
             />
           )}
+          <SelloEstado estado={auto.estado} />
         </div>
         <div className="px-4 pt-4">
           <p className="text-xs font-bold uppercase tracking-wide text-senal-2">{auto.marca}</p>
@@ -96,7 +88,7 @@ export default function AutoCard({ auto, delay, onVerFicha, badge }: Props) {
         <button
           type="button"
           onClick={() => onVerFicha(auto)}
-          className="group/btn flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-sm bg-tinta px-3 text-sm font-bold uppercase tracking-wide text-hueso transition hover:bg-senal hover:text-tinta"
+          className="group/btn flex min-h-11 flex-1 items-center justify-center gap-1.5 bg-tinta px-3 text-sm font-bold uppercase tracking-wide text-hueso transition hover:bg-senal hover:text-tinta"
         >
           Ver detalle
           <span className="transition-transform duration-200 ease-out group-hover/btn:translate-x-1">
@@ -108,7 +100,7 @@ export default function AutoCard({ auto, delay, onVerFicha, badge }: Props) {
           target="_blank"
           rel="noreferrer"
           aria-label={`Consultar por WhatsApp el ${auto.marca} ${auto.modelo}`}
-          className="flex min-h-11 min-w-11 items-center justify-center rounded-sm bg-[#25D366] px-3 text-tinta transition hover:brightness-95"
+          className="flex min-h-11 min-w-11 items-center justify-center bg-[#25D366] px-3 text-tinta transition hover:brightness-95"
         >
           <WhatsAppIcon />
         </a>
